@@ -22,6 +22,11 @@ public class Question {
     public char getCorrect() {
         return correct;
     }
+    public String getAnswer1() { return Answer1; }
+    public String getAnswer2() { return Answer2; }
+    public String getAnswer3() { return Answer3; }
+    public String getAnswer4() { return Answer4; }
+
 
     @Override
     public String toString() {
