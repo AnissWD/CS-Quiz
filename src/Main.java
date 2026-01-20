@@ -1,3 +1,5 @@
+import javax.swing.*;
+
 public class Main{
     public static void main(String[] args){
     Quiz quiz= new Quiz();
@@ -43,5 +45,6 @@ public class Main{
                 "110",
                 'A'
         ));
-        quiz.start();
+        SwingUtilities.invokeLater(() -> new QuizUI(quiz));
+
 }}
