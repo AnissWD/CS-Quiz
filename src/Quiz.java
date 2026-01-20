@@ -1,35 +1,36 @@
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class Quiz {
 
     private ArrayList<Question> questions = new ArrayList<>();
     private int score = 0;
+    private int index = 0;
 
     public void addQuestion(Question q) {
         questions.add(q);
     }
 
-    public void start() {
+    public Question getCurrentQuestion() {
+        return questions.get(index);
+    }
 
-        Scanner sc = new Scanner(System.in);
-
-        for (Question q : questions) {
-
-            System.out.println("----------------------------------");
-            System.out.println(q);
-
-            System.out.print("Your answer: ");
-            char ans = Character.toUpperCase(sc.next().charAt(0));
-
-            if (ans == q.getCorrect()) {
-                System.out.println("Correct!");
-                score++;
-            } else {
-                System.out.println("Wrong, Correct answer: " + q.getCorrect());
-            }
+    public void submitAnswer(char ans) {
+        if (ans == getCurrentQuestion().getCorrect()) {
+            score++;
         }
+        index++;
+    }
 
-        System.out.println("\nFinal Score: " + score + "/" + questions.size());
+    public boolean hasNext() {
+        return index < questions.size();
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getTotal() {
+        return questions.size();
     }
 }
+
