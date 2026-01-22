@@ -1,4 +1,4 @@
-package QuizPackage;
+package com.aniss.csquiz;
 
 import javax.swing.*;
 import java.awt.*;
