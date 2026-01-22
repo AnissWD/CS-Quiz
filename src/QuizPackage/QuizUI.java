@@ -1,3 +1,5 @@
+package QuizPackage;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -19,7 +21,7 @@ public class QuizUI extends JFrame {
     public QuizUI(Quiz quiz) {
         this.quiz = quiz;
 
-        setTitle("CS Quiz");
+        setTitle("CS QuizPackage.Quiz");
         setSize(600, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -98,7 +100,7 @@ public class QuizUI extends JFrame {
 
         questionLabel.setText("<html>" + q.getText() + "</html>");
         progressLabel.setText(
-                "Question " + (quiz.getTotal() - (quiz.hasNext() ? quiz.getTotal() - 1 : 0))
+                "QuizPackage.Question " + (quiz.getTotal() - (quiz.hasNext() ? quiz.getTotal() - 1 : 0))
         );
 
         a.setText("A) " + q.getAnswer1());
@@ -128,7 +130,7 @@ public class QuizUI extends JFrame {
         } else {
             JOptionPane.showMessageDialog(
                     this,
-                    "Quiz Finished!\nScore: " +
+                    "QuizPackage.Quiz Finished!\nScore: " +
                             quiz.getScore() + "/" + quiz.getTotal()
             );
             dispose();

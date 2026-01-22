@@ -1,3 +1,5 @@
+package QuizPackage;
+
 import javax.swing.*;
 
 public class Main{

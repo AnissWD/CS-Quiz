@@ -1,3 +1,5 @@
+package QuizPackage;
+
 public class Question {
 
     private String text;
