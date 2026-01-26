@@ -5,6 +5,7 @@ public class Question {
     private String text;
     private String Answer1, Answer2, Answer3, Answer4;
     private char correct;
+    private static int number=0;
 
     public Question(String text, String Answer1, String Answer2,
                     String Answer3, String Answer4, char correct) {
@@ -15,6 +16,7 @@ public class Question {
         this.Answer3 = Answer3;
         this.Answer4 = Answer4;
         this.correct = correct;
+        number+=1;
     }
 
     public String getText() {
@@ -28,6 +30,10 @@ public class Question {
     public String getAnswer2() { return Answer2; }
     public String getAnswer3() { return Answer3; }
     public String getAnswer4() { return Answer4; }
+
+    public static int getNumber(){
+        return number;
+    }
 
 
     @Override

@@ -23,6 +23,7 @@ public class Quiz {
         index++;
     }
 
+
     public boolean hasNext() {
         return index < questions.size();
     }
