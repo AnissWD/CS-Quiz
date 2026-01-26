@@ -4,29 +4,30 @@ import javax.swing.*;
 import java.awt.*;
 
 public class QuizUI extends JFrame {
-
     private Quiz quiz;
     private JLabel questionLabel;
     private JLabel progressLabel;
+    private JLabel feedbackLabel;
     private JPanel answersPanel;
     private JRadioButton a, b, c, d;
     private ButtonGroup group;
     private JButton nextBtn;
 
-
     private final Color BG = new Color(30, 30, 30);
     private final Color CARD = new Color(45, 45, 45);
     private final Color ACCENT = new Color(70, 130, 255);
     private final Color TEXT = Color.WHITE;
+    private final Color SUCCESS = new Color(50, 200, 100);
+    private final Color ERROR = new Color(255, 80, 80);
 
     public QuizUI(Quiz quiz) {
         this.quiz = quiz;
-
         setTitle("CS Quiz");
-        setSize(600, 400);
+        setSize(600, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         getContentPane().setBackground(BG);
+
         try {
             Image icon = Toolkit.getDefaultToolkit().getImage("src/CSQuizIcon.png");
             setIconImage(icon);
@@ -34,27 +35,23 @@ public class QuizUI extends JFrame {
             System.out.println("Icon not found");
         }
 
-
         JPanel card = new JPanel();
         card.setBackground(CARD);
         card.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         card.setLayout(new BorderLayout(10, 10));
 
-
         progressLabel = new JLabel();
         progressLabel.setForeground(ACCENT);
         progressLabel.setFont(new Font("Arial", Font.BOLD, 12));
-
 
         questionLabel = new JLabel();
         questionLabel.setForeground(TEXT);
         questionLabel.setFont(new Font("Arial", Font.BOLD, 18));
 
-        JPanel top = new JPanel(new BorderLayout());
+        JPanel top = new JPanel(new BorderLayout(0, 10));
         top.setBackground(CARD);
         top.add(progressLabel, BorderLayout.NORTH);
         top.add(questionLabel, BorderLayout.CENTER);
-
 
         a = createOption();
         b = createOption();
@@ -75,7 +72,6 @@ public class QuizUI extends JFrame {
         answersPanel.add(c);
         answersPanel.add(d);
 
-
         nextBtn = new JButton("Next");
         nextBtn.setBackground(ACCENT);
         nextBtn.setForeground(Color.WHITE);
@@ -83,10 +79,20 @@ public class QuizUI extends JFrame {
         nextBtn.setFocusPainted(false);
         nextBtn.addActionListener(e -> next());
 
+        feedbackLabel = new JLabel("");
+        feedbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        feedbackLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        feedbackLabel.setForeground(TEXT);
+        feedbackLabel.setPreferredSize(new Dimension(0, 25));
+
+        JPanel bottomPanel = new JPanel(new BorderLayout(0, 5));
+        bottomPanel.setBackground(CARD);
+        bottomPanel.add(feedbackLabel, BorderLayout.NORTH);
+        bottomPanel.add(nextBtn, BorderLayout.SOUTH);
 
         card.add(top, BorderLayout.NORTH);
         card.add(answersPanel, BorderLayout.CENTER);
-        card.add(nextBtn, BorderLayout.SOUTH);
+        card.add(bottomPanel, BorderLayout.SOUTH);
 
         add(card);
         loadQuestion();
@@ -102,12 +108,10 @@ public class QuizUI extends JFrame {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.setIcon(new ImageIcon());
         btn.setSelectedIcon(new ImageIcon());
-
         btn.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(60, 60, 60), 2, true),
                 BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -133,7 +137,6 @@ public class QuizUI extends JFrame {
             }
         });
 
-
         btn.addItemListener(e -> {
             if (btn.isSelected()) {
                 btn.setBackground(new Color(55, 65, 85));
@@ -155,22 +158,30 @@ public class QuizUI extends JFrame {
 
     private void loadQuestion() {
         Question q = quiz.getCurrentQuestion();
-
         questionLabel.setText("<html>" + q.getText() + "</html>");
-        progressLabel.setText("Question "+(quiz.getIndex()+1)+" :");
-
+        progressLabel.setText("Question " + (quiz.getIndex() + 1) + ":");
         a.setText("A) " + q.getAnswer1());
         b.setText("B) " + q.getAnswer2());
         c.setText("C) " + q.getAnswer3());
         d.setText("D) " + q.getAnswer4());
-
         group.clearSelection();
+        clearFeedback();
+        nextBtn.setText("Next");
     }
+
+    private void showFeedback(String message, Color color) {
+        feedbackLabel.setText(message);
+        feedbackLabel.setForeground(color);
+    }
+
+    private void clearFeedback() {
+        feedbackLabel.setText("");
+    }
+
     private void shakeComponent(JComponent comp) {
         Point original = comp.getLocation();
         Timer timer = new Timer(50, null);
         final int[] count = {0};
-
         timer.addActionListener(e -> {
             if (count[0] < 8) {
                 int offset = (count[0] % 2 == 0) ? 10 : -10;
@@ -186,12 +197,10 @@ public class QuizUI extends JFrame {
 
     private void flashCorrect(JRadioButton btn) {
         Color original = btn.getBackground();
-        Color flash = new Color(50, 200, 100);
-
+        Color flash = SUCCESS;
         Timer timer = new Timer(100, null);
         final boolean[] isFlash = {false};
         final int[] count = {0};
-
         timer.addActionListener(e -> {
             if (count[0] < 4) {
                 btn.setBackground(isFlash[0] ? original : flash);
@@ -207,12 +216,10 @@ public class QuizUI extends JFrame {
 
     private void flashWrong(JRadioButton btn) {
         Color original = btn.getBackground();
-        Color flash = new Color(255, 80, 80);
-
+        Color flash = ERROR;
         Timer timer = new Timer(100, null);
         final boolean[] isFlash = {false};
         final int[] count = {0};
-
         timer.addActionListener(e -> {
             if (count[0] < 4) {
                 btn.setBackground(isFlash[0] ? original : flash);
@@ -235,14 +242,13 @@ public class QuizUI extends JFrame {
 
     private void next() {
         char ans;
-
         if (a.isSelected()) ans = 'A';
         else if (b.isSelected()) ans = 'B';
         else if (c.isSelected()) ans = 'C';
         else if (d.isSelected()) ans = 'D';
         else {
             shakeComponent(answersPanel);
-            JOptionPane.showMessageDialog(this, "Select an answer!");
+            showFeedback("Please select an answer!", new Color(255, 165, 0));
             return;
         }
 
@@ -252,30 +258,53 @@ public class QuizUI extends JFrame {
 
         if (wasCorrect) {
             flashCorrect(getSelectedButton());
+            showFeedback("Correct!", SUCCESS);
+
+            if (!quiz.hasNext()) {
+                nextBtn.setText("Finish");
+            }
+
             Timer timer = new Timer(500, e -> {
-                JOptionPane.showMessageDialog(this, "Correct!", "Result", JOptionPane.INFORMATION_MESSAGE);
                 if (quiz.hasNext()) {
                     loadQuestion();
                 } else {
-                    JOptionPane.showMessageDialog(this, "CS Quiz Finished!\nScore: " + quiz.getScore() + "/" + quiz.getTotal());
-                    dispose();
+                    showFinalScore();
                 }
             });
             timer.setRepeats(false);
             timer.start();
         } else {
             flashWrong(getSelectedButton());
+            showFeedback("Wrong! The correct answer was " + correctAnswer, ERROR);
+
+            if (!quiz.hasNext()) {
+                nextBtn.setText("Finish");
+            }
+
             Timer timer = new Timer(500, e -> {
-                JOptionPane.showMessageDialog(this, "Wrong! The correct answer was " + correctAnswer, "Result", JOptionPane.ERROR_MESSAGE);
                 if (quiz.hasNext()) {
                     loadQuestion();
                 } else {
-                    JOptionPane.showMessageDialog(this, "CS Quiz Finished!\nScore: " + quiz.getScore() + "/" + quiz.getTotal());
-                    dispose();
+                    showFinalScore();
                 }
             });
             timer.setRepeats(false);
             timer.start();
         }
+    }
+
+    private void showFinalScore() {
+        questionLabel.setText("<html><center>Quiz Completed!</center></html>");
+        progressLabel.setText("");
+        showFeedback("Final Score: " + quiz.getScore() + "/" + quiz.getTotal(), ACCENT);
+
+        a.setVisible(false);
+        b.setVisible(false);
+        c.setVisible(false);
+        d.setVisible(false);
+
+        nextBtn.setText("Close");
+        nextBtn.removeActionListener(nextBtn.getActionListeners()[0]);
+        nextBtn.addActionListener(e -> dispose());
     }
 }
