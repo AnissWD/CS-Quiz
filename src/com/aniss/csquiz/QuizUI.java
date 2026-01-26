@@ -69,7 +69,7 @@ public class QuizUI extends JFrame {
         answers.add(d);
 
 
-        nextBtn = new JButton("Next ➜");
+        nextBtn = new JButton("Next");
         nextBtn.setBackground(ACCENT);
         nextBtn.setForeground(Color.WHITE);
         nextBtn.setFont(new Font("Arial", Font.BOLD, 14));
@@ -90,8 +90,59 @@ public class QuizUI extends JFrame {
         JRadioButton btn = new JRadioButton();
         btn.setBackground(CARD);
         btn.setForeground(TEXT);
-        btn.setFont(new Font("Arial", Font.PLAIN, 14));
+        btn.setFont(new Font("Arial", Font.PLAIN, 15));
         btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setIcon(new ImageIcon());
+        btn.setSelectedIcon(new ImageIcon());
+
+        btn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(60, 60, 60), 2, true),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (btn.isEnabled()) {
+                    btn.setBackground(new Color(55, 55, 55));
+                    btn.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(ACCENT, 2, true),
+                            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (btn.isEnabled() && !btn.isSelected()) {
+                    btn.setBackground(CARD);
+                    btn.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(60, 60, 60), 2, true),
+                            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                    ));
+                }
+            }
+        });
+
+
+        btn.addItemListener(e -> {
+            if (btn.isSelected()) {
+                btn.setBackground(new Color(55, 65, 85));
+                btn.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(ACCENT, 3, true),
+                        BorderFactory.createEmptyBorder(14, 19, 14, 19)
+                ));
+            } else {
+                btn.setBackground(CARD);
+                btn.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(60, 60, 60), 2, true),
+                        BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                ));
+            }
+        });
+
         return btn;
     }
 
