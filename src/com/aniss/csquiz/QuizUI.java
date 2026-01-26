@@ -100,7 +100,7 @@ public class QuizUI extends JFrame {
 
         questionLabel.setText("<html>" + q.getText() + "</html>");
         progressLabel.setText(
-                "QuizPackage.Question " + (quiz.getTotal() - (quiz.hasNext() ? quiz.getTotal() - 1 : 0))
+                "QuizPackage.Question "
         );
 
         a.setText("A) " + q.getAnswer1());
@@ -122,8 +122,26 @@ public class QuizUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Select an answer!");
             return;
         }
+        char correctAnswer = quiz.getCurrentQuestion().getCorrect();
 
+        boolean wasCorrect = (ans == correctAnswer);
         quiz.submitAnswer(ans);
+
+        if (wasCorrect) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Correct!",
+                    "Result",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        } else {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Wrong! The correct answer was " + correctAnswer,
+                    "Result",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
 
         if (quiz.hasNext()) {
             loadQuestion();
