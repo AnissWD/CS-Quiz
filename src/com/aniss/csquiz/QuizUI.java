@@ -8,6 +8,7 @@ public class QuizUI extends JFrame {
     private Quiz quiz;
     private JLabel questionLabel;
     private JLabel progressLabel;
+    private JPanel answersPanel;
     private JRadioButton a, b, c, d;
     private ButtonGroup group;
     private JButton nextBtn;
@@ -26,6 +27,12 @@ public class QuizUI extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         getContentPane().setBackground(BG);
+        try {
+            Image icon = Toolkit.getDefaultToolkit().getImage("src/CSQuizIcon.png");
+            setIconImage(icon);
+        } catch (Exception e) {
+            System.out.println("Icon not found");
+        }
 
 
         JPanel card = new JPanel();
@@ -60,13 +67,13 @@ public class QuizUI extends JFrame {
         group.add(c);
         group.add(d);
 
-        JPanel answers = new JPanel();
-        answers.setBackground(CARD);
-        answers.setLayout(new GridLayout(4, 1, 5, 5));
-        answers.add(a);
-        answers.add(b);
-        answers.add(c);
-        answers.add(d);
+        answersPanel = new JPanel();
+        answersPanel.setBackground(CARD);
+        answersPanel.setLayout(new GridLayout(4, 1, 5, 5));
+        answersPanel.add(a);
+        answersPanel.add(b);
+        answersPanel.add(c);
+        answersPanel.add(d);
 
 
         nextBtn = new JButton("Next");
@@ -78,7 +85,7 @@ public class QuizUI extends JFrame {
 
 
         card.add(top, BorderLayout.NORTH);
-        card.add(answers, BorderLayout.CENTER);
+        card.add(answersPanel, BorderLayout.CENTER);
         card.add(nextBtn, BorderLayout.SOUTH);
 
         add(card);
@@ -159,6 +166,72 @@ public class QuizUI extends JFrame {
 
         group.clearSelection();
     }
+    private void shakeComponent(JComponent comp) {
+        Point original = comp.getLocation();
+        Timer timer = new Timer(50, null);
+        final int[] count = {0};
+
+        timer.addActionListener(e -> {
+            if (count[0] < 8) {
+                int offset = (count[0] % 2 == 0) ? 10 : -10;
+                comp.setLocation(original.x + offset, original.y);
+                count[0]++;
+            } else {
+                comp.setLocation(original);
+                timer.stop();
+            }
+        });
+        timer.start();
+    }
+
+    private void flashCorrect(JRadioButton btn) {
+        Color original = btn.getBackground();
+        Color flash = new Color(50, 200, 100);
+
+        Timer timer = new Timer(100, null);
+        final boolean[] isFlash = {false};
+        final int[] count = {0};
+
+        timer.addActionListener(e -> {
+            if (count[0] < 4) {
+                btn.setBackground(isFlash[0] ? original : flash);
+                isFlash[0] = !isFlash[0];
+                count[0]++;
+            } else {
+                btn.setBackground(original);
+                timer.stop();
+            }
+        });
+        timer.start();
+    }
+
+    private void flashWrong(JRadioButton btn) {
+        Color original = btn.getBackground();
+        Color flash = new Color(255, 80, 80);
+
+        Timer timer = new Timer(100, null);
+        final boolean[] isFlash = {false};
+        final int[] count = {0};
+
+        timer.addActionListener(e -> {
+            if (count[0] < 4) {
+                btn.setBackground(isFlash[0] ? original : flash);
+                isFlash[0] = !isFlash[0];
+                count[0]++;
+            } else {
+                btn.setBackground(original);
+                timer.stop();
+            }
+        });
+        timer.start();
+    }
+
+    private JRadioButton getSelectedButton() {
+        if (a.isSelected()) return a;
+        if (b.isSelected()) return b;
+        if (c.isSelected()) return c;
+        return d;
+    }
 
     private void next() {
         char ans;
@@ -168,39 +241,41 @@ public class QuizUI extends JFrame {
         else if (c.isSelected()) ans = 'C';
         else if (d.isSelected()) ans = 'D';
         else {
+            shakeComponent(answersPanel);
             JOptionPane.showMessageDialog(this, "Select an answer!");
             return;
         }
-        char correctAnswer = quiz.getCurrentQuestion().getCorrect();
 
+        char correctAnswer = quiz.getCurrentQuestion().getCorrect();
         boolean wasCorrect = (ans == correctAnswer);
         quiz.submitAnswer(ans);
 
         if (wasCorrect) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Correct!",
-                    "Result",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            flashCorrect(getSelectedButton());
+            Timer timer = new Timer(500, e -> {
+                JOptionPane.showMessageDialog(this, "Correct!", "Result", JOptionPane.INFORMATION_MESSAGE);
+                if (quiz.hasNext()) {
+                    loadQuestion();
+                } else {
+                    JOptionPane.showMessageDialog(this, "CS Quiz Finished!\nScore: " + quiz.getScore() + "/" + quiz.getTotal());
+                    dispose();
+                }
+            });
+            timer.setRepeats(false);
+            timer.start();
         } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Wrong! The correct answer was " + correctAnswer,
-                    "Result",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
-
-        if (quiz.hasNext()) {
-            loadQuestion();
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "CS Quiz Finished!\nScore: " +
-                            quiz.getScore() + "/" + quiz.getTotal()
-            );
-            dispose();
+            flashWrong(getSelectedButton());
+            Timer timer = new Timer(500, e -> {
+                JOptionPane.showMessageDialog(this, "Wrong! The correct answer was " + correctAnswer, "Result", JOptionPane.ERROR_MESSAGE);
+                if (quiz.hasNext()) {
+                    loadQuestion();
+                } else {
+                    JOptionPane.showMessageDialog(this, "CS Quiz Finished!\nScore: " + quiz.getScore() + "/" + quiz.getTotal());
+                    dispose();
+                }
+            });
+            timer.setRepeats(false);
+            timer.start();
         }
     }
 }
