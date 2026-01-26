@@ -157,7 +157,7 @@ public class QuizUI extends JFrame {
         Question q = quiz.getCurrentQuestion();
 
         questionLabel.setText("<html>" + q.getText() + "</html>");
-        progressLabel.setText("Question :");
+        progressLabel.setText("Question "+(quiz.getIndex()+1)+" :");
 
         a.setText("A) " + q.getAnswer1());
         b.setText("B) " + q.getAnswer2());

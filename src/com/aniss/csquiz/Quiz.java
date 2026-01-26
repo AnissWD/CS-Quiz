@@ -32,6 +32,8 @@ public class Quiz {
         return score;
     }
 
+    public int getIndex(){return index;}
+
     public int getTotal() {
         return questions.size();
     }
