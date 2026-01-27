@@ -47,6 +47,12 @@ public class QuizUI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0));
+        try {
+            Image icon = Toolkit.getDefaultToolkit().getImage("src/icons/CSQuizIcon.png");
+            setIconImage(icon);
+        } catch (Exception e) {
+            System.out.println("Icon not found");
+        }
 
         JPanel titleBar = createTitleBar();
 
@@ -117,26 +123,23 @@ public class QuizUI extends JFrame {
                 BorderFactory.createEmptyBorder(10, 20, 10, 10)
         ));
 
-        JLabel titleLabel = new JLabel(">> CS QUIZ");
+        JLabel titleLabel = new JLabel("CS QUIZ");
         titleLabel.setFont(new Font("Consolas", Font.BOLD, 16));
         titleLabel.setForeground(ACCENT_CYAN);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
 
-        JButton musicBtn = createTitleBarButton("♪");
-        musicBtn.setToolTipText("Toggle Music");
+        JButton musicBtn = createTitleBarButton("MUSIC");
         musicBtn.addActionListener(e -> {
             toggleBackgroundMusic();
-            musicBtn.setText(musicEnabled ? "♪" : "♫");
+            musicBtn.setText(musicEnabled ? "MUSIC" : "MUTED");
         });
 
-        JButton minimizeBtn = createTitleBarButton("_");
-        minimizeBtn.setToolTipText("Minimize");
+        JButton minimizeBtn = createTitleBarButton("MIN");
         minimizeBtn.addActionListener(e -> setState(JFrame.ICONIFIED));
 
-        JButton closeBtn = createTitleBarButton("X");
-        closeBtn.setToolTipText("Close");
+        JButton closeBtn = createTitleBarButton("EXIT");
         closeBtn.setForeground(ERROR);
         closeBtn.addActionListener(e -> {
             stopBackgroundMusic();
@@ -171,14 +174,14 @@ public class QuizUI extends JFrame {
 
     private JButton createTitleBarButton(String text) {
         JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 16));
+        btn.setFont(new Font("Consolas", Font.BOLD, 11));
         btn.setForeground(TEXT_SECONDARY);
         btn.setBackground(new Color(0, 0, 0, 0));
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setContentAreaFilled(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(30, 30));
+        btn.setMargin(new Insets(0, 5, 0, 5));
 
         btn.addMouseListener(new MouseAdapter() {
             @Override
@@ -187,7 +190,11 @@ public class QuizUI extends JFrame {
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                btn.setForeground(TEXT_SECONDARY);
+                if (btn.getText().equals("EXIT")) {
+                    btn.setForeground(ERROR);
+                } else {
+                    btn.setForeground(TEXT_SECONDARY);
+                }
             }
         });
 
@@ -395,7 +402,7 @@ public class QuizUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
 
-        nextBtn = new JButton("NEXT →") {
+        nextBtn = new JButton("NEXT") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g;
@@ -452,7 +459,7 @@ public class QuizUI extends JFrame {
         selectedAnswerIndex = -1;
 
         progressBarPanel.repaint();
-        nextBtn.setText("NEXT →");
+        nextBtn.setText("NEXT");
 
         startTimer();
     }
@@ -490,6 +497,16 @@ public class QuizUI extends JFrame {
         streakLabel.setText("STREAK: " + streak);
         playWrongSound();
         showFeedback("Time's up!", ERROR);
+
+        quiz.submitAnswer('X');
+
+        for (JButton btn : answerButtons) {
+            btn.setEnabled(false);
+        }
+
+        if (!quiz.hasNext()) {
+            nextBtn.setText("FINISH");
+        }
 
         Timer delay = new Timer(1500, e -> {
             if (quiz.hasNext()) {
