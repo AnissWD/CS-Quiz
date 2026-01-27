@@ -5,6 +5,7 @@ import javax.sound.sampled.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -817,39 +818,42 @@ public class QuizUI extends JFrame {
     private void playBeep(final int frequency, final int duration) {
         new Thread(() -> {
             try {
-                AudioFormat af = new AudioFormat(44100, 8, 1, true, false);
-                SourceDataLine sdl = AudioSystem.getSourceDataLine(af);
-                sdl.open(af);
-                sdl.start();
+                int sampleRate = 44100;
+                int samples = (int) ((duration / 1000.0) * sampleRate);
+                byte[] buffer = new byte[samples * 2];
 
-                int totalSamples = (int) (duration * 44.1);
-                int fadeLength = (int) (totalSamples * 0.1);
-                byte[] buf = new byte[1];
+                int fadeLength = samples / 10;
 
-                for (int i = 0; i < totalSamples; i++) {
-                    double angle = i / (44100.0 / frequency) * 2.0 * Math.PI;
+                for (int i = 0; i < samples; i++) {
+                    double angle = 2.0 * Math.PI * i * frequency / sampleRate;
                     double sample = Math.sin(angle);
 
                     double envelope = 1.0;
                     if (i < fadeLength) {
                         envelope = (double) i / fadeLength;
-                    } else if (i > totalSamples - fadeLength) {
-                        envelope = (double) (totalSamples - i) / fadeLength;
+                    } else if (i > samples - fadeLength) {
+                        envelope = (double) (samples - i) / fadeLength;
                     }
 
-                    buf[0] = (byte) (sample * envelope * 80);
-                    sdl.write(buf, 0, 1);
+                    short val = (short) (sample * envelope * 5000);
+                    buffer[i * 2] = (byte) (val & 0xFF);
+                    buffer[i * 2 + 1] = (byte) ((val >> 8) & 0xFF);
                 }
 
-                sdl.drain();
-                sdl.stop();
-                sdl.close();
-            } catch (LineUnavailableException e) {
+                AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
+                ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
+                AudioInputStream ais = new AudioInputStream(bais, format, samples);
+                Clip clip = AudioSystem.getClip();
+                clip.open(ais);
+                clip.start();
+
+                Thread.sleep(duration + 100);
+                clip.close();
+            } catch (Exception e) {
                 System.out.println("Error playing beep: " + e.getMessage());
             }
         }).start();
     }
-
     private void playCorrectSound() {
         File soundFile = new File("src/sounds/correct.wav");
         if (soundFile.exists()) {
