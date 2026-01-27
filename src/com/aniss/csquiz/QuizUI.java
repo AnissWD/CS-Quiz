@@ -1,7 +1,10 @@
 package com.aniss.csquiz;
 
 import javax.swing.*;
+import javax.sound.sampled.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 
 public class QuizUI extends JFrame {
     private Quiz quiz;
@@ -156,6 +159,92 @@ public class QuizUI extends JFrame {
         return btn;
     }
 
+    private void playSound(String filename) {
+        try {
+            File soundFile = new File(filename);
+            if (!soundFile.exists()) {
+                System.out.println("Sound file not found: " + filename);
+                return;
+            }
+
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+
+
+            clip.addLineListener(event -> {
+                if (event.getType() == LineEvent.Type.STOP) {
+                    clip.close();
+                    try {
+                        audioInputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            System.out.println("Error playing sound: " + e.getMessage());
+        }
+    }
+
+    private void playBeep(final int frequency, final int duration) {
+        new Thread(() -> {
+            try {
+                AudioFormat af = new AudioFormat(44100, 8, 1, true, false);
+                SourceDataLine sdl = AudioSystem.getSourceDataLine(af);
+                sdl.open(af);
+                sdl.start();
+
+                byte[] buf = new byte[1];
+                for (int i = 0; i < duration * 44.1; i++) {
+                    double angle = i / (44100.0 / frequency) * 2.0 * Math.PI;
+                    buf[0] = (byte) (Math.sin(angle) * 100);
+                    sdl.write(buf, 0, 1);
+                }
+
+                sdl.drain();
+                sdl.stop();
+                sdl.close();
+            } catch (LineUnavailableException e) {
+                System.out.println("Error playing beep: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    private void playCorrectSound() {
+
+        File soundFile = new File("src/sounds/correct.wav");
+        if (soundFile.exists()) {
+            playSound("src/sounds/correct.wav");
+        } else {
+
+            new Thread(() -> {
+                playBeep(523, 100);
+                try { Thread.sleep(50); } catch (InterruptedException e) {}
+                playBeep(659, 100);
+                try { Thread.sleep(50); } catch (InterruptedException e) {}
+                playBeep(784, 150);
+            }).start();
+        }
+    }
+
+    private void playWrongSound() {
+
+        File soundFile = new File("src/sounds/wrong.wav");
+        if (soundFile.exists()) {
+            playSound("src/sounds/wrong.wav");
+        } else {
+
+            new Thread(() -> {
+                playBeep(400, 150); // Lower frequency
+                try { Thread.sleep(50); } catch (InterruptedException e) {}
+                playBeep(300, 200); // Even lower
+            }).start();
+        }
+    }
+
     private void loadQuestion() {
         Question q = quiz.getCurrentQuestion();
         questionLabel.setText("<html>" + q.getText() + "</html>");
@@ -257,6 +346,7 @@ public class QuizUI extends JFrame {
         quiz.submitAnswer(ans);
 
         if (wasCorrect) {
+            playCorrectSound();
             flashCorrect(getSelectedButton());
             showFeedback("Correct!", SUCCESS);
 
@@ -274,6 +364,7 @@ public class QuizUI extends JFrame {
             timer.setRepeats(false);
             timer.start();
         } else {
+            playWrongSound();
             flashWrong(getSelectedButton());
             showFeedback("Wrong! The correct answer was " + correctAnswer, ERROR);
 
