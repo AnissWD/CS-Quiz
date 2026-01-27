@@ -822,10 +822,22 @@ public class QuizUI extends JFrame {
                 sdl.open(af);
                 sdl.start();
 
+                int totalSamples = (int) (duration * 44.1);
+                int fadeLength = (int) (totalSamples * 0.1);
                 byte[] buf = new byte[1];
-                for (int i = 0; i < duration * 44.1; i++) {
+
+                for (int i = 0; i < totalSamples; i++) {
                     double angle = i / (44100.0 / frequency) * 2.0 * Math.PI;
-                    buf[0] = (byte) (Math.sin(angle) * 100);
+                    double sample = Math.sin(angle);
+
+                    double envelope = 1.0;
+                    if (i < fadeLength) {
+                        envelope = (double) i / fadeLength;
+                    } else if (i > totalSamples - fadeLength) {
+                        envelope = (double) (totalSamples - i) / fadeLength;
+                    }
+
+                    buf[0] = (byte) (sample * envelope * 80);
                     sdl.write(buf, 0, 1);
                 }
 
