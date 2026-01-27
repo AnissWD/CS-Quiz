@@ -23,6 +23,9 @@ public class QuizUI extends JFrame {
     private final Color SUCCESS = new Color(50, 200, 100);
     private final Color ERROR = new Color(255, 80, 80);
 
+    private Clip backgroundMusicClip;
+    private boolean musicEnabled = true;
+
     public QuizUI(Quiz quiz) {
         this.quiz = quiz;
         setTitle("CS Quiz");
@@ -53,7 +56,28 @@ public class QuizUI extends JFrame {
 
         JPanel top = new JPanel(new BorderLayout(0, 10));
         top.setBackground(CARD);
-        top.add(progressLabel, BorderLayout.NORTH);
+
+
+        JButton musicToggleBtn = new JButton("Music");
+        musicToggleBtn.setBackground(CARD);
+        musicToggleBtn.setForeground(ACCENT);
+        musicToggleBtn.setFont(new Font("Arial", Font.PLAIN, 20));
+        musicToggleBtn.setFocusPainted(false);
+        musicToggleBtn.setBorderPainted(false);
+        musicToggleBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        musicToggleBtn.setPreferredSize(new Dimension(40, 30));
+        musicToggleBtn.setToolTipText("Toggle background music");
+        musicToggleBtn.addActionListener(e -> {
+            toggleBackgroundMusic();
+            musicToggleBtn.setText(musicEnabled ? "🔊" : "🔇");
+        });
+
+        JPanel topLeft = new JPanel(new BorderLayout());
+        topLeft.setBackground(CARD);
+        topLeft.add(progressLabel, BorderLayout.CENTER);
+        topLeft.add(musicToggleBtn, BorderLayout.EAST);
+
+        top.add(topLeft, BorderLayout.NORTH);
         top.add(questionLabel, BorderLayout.CENTER);
 
         a = createOption();
@@ -100,6 +124,9 @@ public class QuizUI extends JFrame {
         add(card);
         loadQuestion();
         setVisible(true);
+
+
+        SwingUtilities.invokeLater(() -> startBackgroundMusic());
     }
 
     private JRadioButton createOption() {
@@ -158,7 +185,6 @@ public class QuizUI extends JFrame {
 
         return btn;
     }
-
     private void playSound(String filename) {
         try {
             File soundFile = new File(filename);
@@ -213,6 +239,7 @@ public class QuizUI extends JFrame {
         }).start();
     }
 
+
     private void playCorrectSound() {
 
         File soundFile = new File("src/sounds/correct.wav");
@@ -221,14 +248,15 @@ public class QuizUI extends JFrame {
         } else {
 
             new Thread(() -> {
-                playBeep(523, 100);
+                playBeep(523, 100); // C5
                 try { Thread.sleep(50); } catch (InterruptedException e) {}
-                playBeep(659, 100);
+                playBeep(659, 100); // E5
                 try { Thread.sleep(50); } catch (InterruptedException e) {}
-                playBeep(784, 150);
+                playBeep(784, 150); // G5
             }).start();
         }
     }
+
 
     private void playWrongSound() {
 
@@ -245,6 +273,77 @@ public class QuizUI extends JFrame {
         }
     }
 
+
+    private void startBackgroundMusic() {
+        try {
+            File musicFile = new File("src/sounds/background.wav");
+            System.out.println("Looking for background music at: " + musicFile.getAbsolutePath());
+
+            if (!musicFile.exists()) {
+                System.out.println("Background music file not found!");
+                System.out.println("Please place background.wav in: " + musicFile.getAbsolutePath());
+                return;
+            }
+
+            System.out.println("Loading background music...");
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(musicFile);
+            backgroundMusicClip = AudioSystem.getClip();
+            backgroundMusicClip.open(audioInputStream);
+
+            System.out.println("Background music loaded successfully");
+
+
+            if (backgroundMusicClip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                FloatControl gainControl = (FloatControl) backgroundMusicClip.getControl(FloatControl.Type.MASTER_GAIN);
+
+                gainControl.setValue(-10.0f);
+                System.out.println("Volume adjusted to -10dB");
+            } else {
+                System.out.println("Volume control not supported");
+            }
+
+
+            backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
+            backgroundMusicClip.start();
+
+            System.out.println("Background music started and looping");
+        } catch (UnsupportedAudioFileException e) {
+            System.out.println("Error: Unsupported audio file format. Please use WAV format.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Error: Could not read audio file.");
+            e.printStackTrace();
+        } catch (LineUnavailableException e) {
+            System.out.println("Error: Audio line unavailable.");
+            e.printStackTrace();
+        }
+    }
+
+
+    private void stopBackgroundMusic() {
+        if (backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
+            backgroundMusicClip.stop();
+            backgroundMusicClip.close();
+        }
+    }
+
+
+    private void toggleBackgroundMusic() {
+        if (backgroundMusicClip == null) {
+            return;
+        }
+
+        if (musicEnabled) {
+            backgroundMusicClip.stop();
+            musicEnabled = false;
+            System.out.println("Background music paused");
+        } else {
+            backgroundMusicClip.start();
+            musicEnabled = true;
+            System.out.println("Background music resumed");
+        }
+    }
+
     private void loadQuestion() {
         Question q = quiz.getCurrentQuestion();
         questionLabel.setText("<html>" + q.getText() + "</html>");
@@ -254,8 +353,23 @@ public class QuizUI extends JFrame {
         c.setText("C) " + q.getAnswer3());
         d.setText("D) " + q.getAnswer4());
         group.clearSelection();
+
+
+        resetButtonStyle(a);
+        resetButtonStyle(b);
+        resetButtonStyle(c);
+        resetButtonStyle(d);
+
         clearFeedback();
         nextBtn.setText("Next");
+    }
+
+    private void resetButtonStyle(JRadioButton btn) {
+        btn.setBackground(CARD);
+        btn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(60, 60, 60), 2, true),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
     }
 
     private void showFeedback(String message, Color color) {
@@ -385,6 +499,8 @@ public class QuizUI extends JFrame {
     }
 
     private void showFinalScore() {
+        stopBackgroundMusic(); // Stop music when quiz ends
+
         questionLabel.setText("<html><center>Quiz Completed!</center></html>");
         progressLabel.setText("");
         showFeedback("Final Score: " + quiz.getScore() + "/" + quiz.getTotal(), ACCENT);
@@ -396,6 +512,9 @@ public class QuizUI extends JFrame {
 
         nextBtn.setText("Close");
         nextBtn.removeActionListener(nextBtn.getActionListeners()[0]);
-        nextBtn.addActionListener(e -> dispose());
+        nextBtn.addActionListener(e -> {
+            stopBackgroundMusic(); // Ensure music stops
+            dispose();
+        });
     }
 }
