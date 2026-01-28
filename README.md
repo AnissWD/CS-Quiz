@@ -17,7 +17,7 @@ A modern, interactive Computer Science quiz application built entirely with Java
 
 ## 🎮 Screenshots
 
-![[Screenshot 2026-01-28 000120.png]]
+![Screenshot](screenshots/Screenshot_2026-01-28_000120.png)
 ## 🚀 Getting Started
 
 ### Prerequisites
