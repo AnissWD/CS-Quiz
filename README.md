@@ -2,8 +2,8 @@
 
 A modern, interactive Computer Science quiz application built entirely with Java Swing.
 
-![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=java&logoColor=white)
-![Swing](https://img.shields.io/badge/Swing-007396?style=for-the-badge&logo=java&logoColor=white)
+![Java](https://www.java.com/en/)
+![Swing](https://www.geeksforgeeks.org/java/introduction-to-java-swing/)
 
 ## ✨ Features
 
