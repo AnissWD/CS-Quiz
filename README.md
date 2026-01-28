@@ -15,9 +15,12 @@ A modern, interactive Computer Science quiz application built entirely with Java
 - **Smooth Animations** - Visual feedback with color flashes and transitions
 - **Custom Window** - Frameless design with custom title bar controls
 
+
 ## 🎮 Screenshots
 
-![Screenshot](screenshots/Screenshot_2026-01-28_000120.png)
+![Correct Answer](screenshots/Correct-Answer.png)
+![Wrong Answer](screenshots/Wrong-Answer.png)
+
 ## 🚀 Getting Started
 
 ### Prerequisites
