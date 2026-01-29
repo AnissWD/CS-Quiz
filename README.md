@@ -66,7 +66,11 @@ src/sounds/
 └── background.wav   # Background music (loops)
 ```
 
-If sound files are not found, the app will generate programmatic beep sounds as fallback.
+## 🎶 Music Credit
+
+The song used in this application is **“Retro Platforming”** by **David Fesliyan** 🎧.  
+Thanks for the great retro vibes! 🕹️✨
+
 
 ## 🛠️ Technologies Used
 
