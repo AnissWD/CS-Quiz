@@ -131,10 +131,10 @@ public class QuizUI extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
 
-        JButton musicBtn = createTitleBarButton("MUSIC");
+        JButton musicBtn = createTitleBarButton("MUSIC ON");
         musicBtn.addActionListener(e -> {
             toggleBackgroundMusic();
-            musicBtn.setText(musicEnabled ? "MUSIC" : "MUTED");
+            musicBtn.setText(musicEnabled ? "MUSIC ON" : "MUSIC OFF");
         });
 
         JButton minimizeBtn = createTitleBarButton("MIN");
