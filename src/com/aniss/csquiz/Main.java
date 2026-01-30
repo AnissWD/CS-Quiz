@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class Main{
     public static void main(String[] args){
-    Quiz quiz= new Quiz();
+        Quiz quiz = new Quiz();
 
         quiz.addQuestion(new Question(
                 "Which layer handles routing in the OSI model?",
@@ -14,7 +14,6 @@ public class Main{
                 "Session",
                 'B'
         ));
-
         quiz.addQuestion(new Question(
                 "What does CPU stand for?",
                 "Central Process Unit",
@@ -47,6 +46,7 @@ public class Main{
                 "110",
                 'A'
         ));
-        SwingUtilities.invokeLater(() -> new QuizUI(quiz));
 
-}}
+        SwingUtilities.invokeLater(() -> new MainMenu(quiz));
+    }
+}

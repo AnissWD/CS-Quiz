@@ -20,6 +20,7 @@ public class QuizUI extends JFrame {
     private JPanel progressBarPanel;
     private JLabel streakLabel;
     private JLabel timerLabel;
+    private MainMenu mainMenu;
 
     private int streak = 0;
     private Timer countdownTimer;
@@ -40,8 +41,11 @@ public class QuizUI extends JFrame {
     private Clip backgroundMusicClip;
     private boolean musicEnabled = true;
 
-    public QuizUI(Quiz quiz) {
+    public QuizUI(Quiz quiz, MainMenu mainMenu, Clip sharedMusicClip, boolean musicState) {
         this.quiz = quiz;
+        this.mainMenu = mainMenu;
+        this.backgroundMusicClip = sharedMusicClip;
+        this.musicEnabled = musicState;
         setTitle("CS QUIZ");
         setSize(700, 600);
         setLocationRelativeTo(null);
@@ -113,7 +117,6 @@ public class QuizUI extends JFrame {
         loadQuestion();
         setVisible(true);
 
-        SwingUtilities.invokeLater(() -> startBackgroundMusic());
     }
 
     private JPanel createTitleBar() {
@@ -773,8 +776,10 @@ public class QuizUI extends JFrame {
         closeBtn.setFocusPainted(false);
         closeBtn.setContentAreaFilled(false);
         closeBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        closeBtn.addActionListener(e -> dispose());
-
+        closeBtn.addActionListener(e -> {
+            mainMenu.returnFromQuiz();
+            dispose();
+        });
         scoreCard.add(completedLabel);
         scoreCard.add(Box.createVerticalStrut(30));
         scoreCard.add(scoreLabel);
