@@ -8,9 +8,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
-public class QuizUI extends JFrame {
+public class QuizPanel extends JPanel {
     private Quiz quiz;
-    private MainMenu mainMenu;
+    private QuizApplication app;
     private JLabel questionLabel;
     private JLabel progressLabel;
     private JLabel scoreLabel;
@@ -40,62 +40,47 @@ public class QuizUI extends JFrame {
     private Clip backgroundMusicClip;
     private boolean musicEnabled = true;
 
-    public QuizUI(Quiz quiz, MainMenu mainMenu, Clip sharedMusicClip, boolean musicState) {
+    public QuizPanel(Quiz quiz, QuizApplication app, Clip sharedMusicClip, boolean musicState) {
         this.quiz = quiz;
-        this.mainMenu = mainMenu;
+        this.app = app;
         this.backgroundMusicClip = sharedMusicClip;
         this.musicEnabled = musicState;
 
-        setTitle("CS QUIZ");
-        setSize(700, 600);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setUndecorated(true);
-        setBackground(new Color(0, 0, 0, 0));
+        setLayout(new BorderLayout());
+        setOpaque(false);
 
-        try {
-            Image icon = Toolkit.getDefaultToolkit().getImage("src/icons/CSQuizIcon.png");
-            setIconImage(icon);
-        } catch (Exception e) {
-            System.out.println("Icon not found");
+        createUI();
+        loadQuestion();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        GradientPaint gradient = new GradientPaint(
+                0, 0, BG_DARK,
+                getWidth(), getHeight(), new Color(30, 20, 50)
+        );
+        g2d.setPaint(gradient);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+
+        g2d.setColor(new Color(0, 240, 255, 20));
+        g2d.setStroke(new BasicStroke(1));
+        int gridSize = 40;
+        for (int i = 0; i < getWidth(); i += gridSize) {
+            g2d.drawLine(i, 0, i, getHeight());
         }
+        for (int i = 0; i < getHeight(); i += gridSize) {
+            g2d.drawLine(0, i, getWidth(), i);
+        }
+    }
 
-        JPanel titleBar = createTitleBar();
-
-        JPanel mainPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                GradientPaint gradient = new GradientPaint(
-                        0, 0, BG_DARK,
-                        getWidth(), getHeight(), new Color(30, 20, 50)
-                );
-                g2d.setPaint(gradient);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-
-                g2d.setColor(new Color(0, 240, 255, 20));
-                g2d.setStroke(new BasicStroke(1));
-                int gridSize = 40;
-                for (int i = 0; i < getWidth(); i += gridSize) {
-                    g2d.drawLine(i, 0, i, getHeight());
-                }
-                for (int i = 0; i < getHeight(); i += gridSize) {
-                    g2d.drawLine(0, i, getWidth(), i);
-                }
-            }
-        };
-        mainPanel.setLayout(new BorderLayout(0, 0));
-        mainPanel.setOpaque(false);
-
+    private void createUI() {
         JPanel header = createHeader();
-
         JPanel questionCard = createQuestionCard();
-
         answersPanel = createAnswersPanel();
-
         JPanel bottomPanel = createBottomPanel();
 
         JPanel contentPanel = new JPanel(new BorderLayout(0, 20));
@@ -111,98 +96,7 @@ public class QuizUI extends JFrame {
         contentPanel.add(centerPanel, BorderLayout.CENTER);
         contentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        mainPanel.add(titleBar, BorderLayout.NORTH);
-        mainPanel.add(contentPanel, BorderLayout.CENTER);
-
-        add(mainPanel);
-        loadQuestion();
-        setVisible(true);
-    }
-
-    private JPanel createTitleBar() {
-        JPanel titleBar = new JPanel(new BorderLayout());
-        titleBar.setBackground(new Color(15, 15, 25));
-        titleBar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, ACCENT_CYAN),
-                BorderFactory.createEmptyBorder(10, 20, 10, 10)
-        ));
-
-        JLabel titleLabel = new JLabel("CS QUIZ");
-        titleLabel.setFont(new Font("Consolas", Font.BOLD, 16));
-        titleLabel.setForeground(ACCENT_CYAN);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        buttonPanel.setOpaque(false);
-
-        JButton musicBtn = createTitleBarButton("MUSIC ON");
-        musicBtn.addActionListener(e -> {
-            toggleBackgroundMusic();
-            musicBtn.setText(musicEnabled ? "MUSIC ON" : "MUSIC OFF");
-        });
-
-        JButton minimizeBtn = createTitleBarButton("MIN");
-        minimizeBtn.addActionListener(e -> setState(JFrame.ICONIFIED));
-
-        JButton closeBtn = createTitleBarButton("EXIT");
-        closeBtn.setForeground(ERROR);
-        closeBtn.addActionListener(e -> {
-            stopBackgroundMusic();
-            dispose();
-        });
-
-        buttonPanel.add(musicBtn);
-        buttonPanel.add(minimizeBtn);
-        buttonPanel.add(closeBtn);
-
-        titleBar.add(titleLabel, BorderLayout.WEST);
-        titleBar.add(buttonPanel, BorderLayout.EAST);
-
-        MouseAdapter ma = new MouseAdapter() {
-            Point initial;
-            @Override
-            public void mousePressed(MouseEvent e) {
-                initial = e.getPoint();
-            }
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                int x = getLocation().x + e.getX() - initial.x;
-                int y = getLocation().y + e.getY() - initial.y;
-                setLocation(x, y);
-            }
-        };
-        titleBar.addMouseListener(ma);
-        titleBar.addMouseMotionListener(ma);
-
-        return titleBar;
-    }
-
-    private JButton createTitleBarButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Consolas", Font.BOLD, 11));
-        btn.setForeground(TEXT_SECONDARY);
-        btn.setBackground(new Color(0, 0, 0, 0));
-        btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setMargin(new Insets(0, 5, 0, 5));
-
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn.setForeground(ACCENT_CYAN);
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (btn.getText().equals("EXIT")) {
-                    btn.setForeground(ERROR);
-                } else {
-                    btn.setForeground(TEXT_SECONDARY);
-                }
-            }
-        });
-
-        return btn;
+        add(contentPanel, BorderLayout.CENTER);
     }
 
     private JPanel createHeader() {
@@ -308,10 +202,8 @@ public class QuizUI extends JFrame {
         panel.setOpaque(false);
 
         answerButtons = new JButton[4];
-        String[] labels = {"A", "B", "C", "D"};
 
         for (int i = 0; i < 4; i++) {
-            final int index = i;
             answerButtons[i] = new AnswerButton();
 
             answerButtons[i].setFont(new Font("Segoe UI", Font.PLAIN, 16));
@@ -604,14 +496,17 @@ public class QuizUI extends JFrame {
         notifPanel.add(feedback);
         notifPanel.setBounds(200, 10, 300, 40);
 
-        getLayeredPane().add(notifPanel, JLayeredPane.POPUP_LAYER);
+        JRootPane rootPane = SwingUtilities.getRootPane(this);
+        if (rootPane != null) {
+            rootPane.getLayeredPane().add(notifPanel, JLayeredPane.POPUP_LAYER);
 
-        Timer fadeOut = new Timer(1500, e -> {
-            getLayeredPane().remove(notifPanel);
-            getLayeredPane().repaint();
-        });
-        fadeOut.setRepeats(false);
-        fadeOut.start();
+            Timer fadeOut = new Timer(1500, e -> {
+                rootPane.getLayeredPane().remove(notifPanel);
+                rootPane.getLayeredPane().repaint();
+            });
+            fadeOut.setRepeats(false);
+            fadeOut.start();
+        }
     }
 
     private void showNotification(String message) {
@@ -621,14 +516,17 @@ public class QuizUI extends JFrame {
         notif.setHorizontalAlignment(SwingConstants.CENTER);
         notif.setBounds(200, 15, 300, 30);
 
-        getLayeredPane().add(notif, JLayeredPane.POPUP_LAYER);
+        JRootPane rootPane = SwingUtilities.getRootPane(this);
+        if (rootPane != null) {
+            rootPane.getLayeredPane().add(notif, JLayeredPane.POPUP_LAYER);
 
-        Timer remove = new Timer(1000, e -> {
-            getLayeredPane().remove(notif);
-            getLayeredPane().repaint();
-        });
-        remove.setRepeats(false);
-        remove.start();
+            Timer remove = new Timer(1000, e -> {
+                rootPane.getLayeredPane().remove(notif);
+                rootPane.getLayeredPane().repaint();
+            });
+            remove.setRepeats(false);
+            remove.start();
+        }
     }
 
     private void shakeComponent(JComponent comp) {
@@ -667,14 +565,7 @@ public class QuizUI extends JFrame {
 
     private void showFinalScore() {
         stopTimer();
-
-        getContentPane().removeAll();
-
-        ResultsScreen resultsScreen = new ResultsScreen(quiz, mainMenu, backgroundMusicClip, musicEnabled, this);
-        add(resultsScreen);
-
-        revalidate();
-        repaint();
+        app.showResults();
     }
 
     private void playSound(String filename) {
@@ -766,25 +657,6 @@ public class QuizUI extends JFrame {
                 try { Thread.sleep(50); } catch (InterruptedException e) {}
                 playBeep(300, 200);
             }).start();
-        }
-    }
-
-    private void stopBackgroundMusic() {
-        if (backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
-            backgroundMusicClip.stop();
-            backgroundMusicClip.close();
-        }
-    }
-
-    private void toggleBackgroundMusic() {
-        if (backgroundMusicClip == null) return;
-
-        if (musicEnabled) {
-            backgroundMusicClip.stop();
-            musicEnabled = false;
-        } else {
-            backgroundMusicClip.start();
-            musicEnabled = true;
         }
     }
 }

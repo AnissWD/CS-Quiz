@@ -14,6 +14,7 @@ public class Main{
                 "Session",
                 'B'
         ));
+
         quiz.addQuestion(new Question(
                 "What does CPU stand for?",
                 "Central Process Unit",
@@ -22,6 +23,7 @@ public class Main{
                 "None of the above",
                 'C'
         ));
+
         quiz.addQuestion(new Question(
                 "SQL is mainly used for?",
                 "Designing UI",
@@ -30,6 +32,7 @@ public class Main{
                 "Operating systems",
                 'B'
         ));
+
         quiz.addQuestion(new Question(
                 "Which data structure uses FIFO?",
                 "Stack",
@@ -38,6 +41,7 @@ public class Main{
                 "Queue",
                 'D'
         ));
+
         quiz.addQuestion(new Question(
                 "What is the binary of decimal 5?",
                 "101",
@@ -47,6 +51,6 @@ public class Main{
                 'A'
         ));
 
-        SwingUtilities.invokeLater(() -> new MainMenu(quiz));
+        SwingUtilities.invokeLater(() -> new QuizApplication(quiz));
     }
 }

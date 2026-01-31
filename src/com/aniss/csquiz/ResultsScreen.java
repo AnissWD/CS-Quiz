@@ -8,10 +8,9 @@ import java.awt.event.*;
 public class ResultsScreen extends JPanel {
 
     private Quiz quiz;
-    private MainMenu mainMenu;
+    private QuizApplication app;
     private Clip backgroundMusicClip;
     private boolean musicEnabled;
-    private JFrame parentFrame;
 
     private final Color BG_DARK = new Color(10, 10, 20);
     private final Color BG_CARD = new Color(20, 20, 35);
@@ -24,12 +23,11 @@ public class ResultsScreen extends JPanel {
     private final Color ERROR = new Color(255, 70, 100);
     private final Color GLOW_MAGENTA = new Color(255, 0, 170, 40);
 
-    public ResultsScreen(Quiz quiz, MainMenu mainMenu, Clip backgroundMusicClip, boolean musicEnabled, JFrame parentFrame) {
+    public ResultsScreen(Quiz quiz, QuizApplication app, Clip backgroundMusicClip, boolean musicEnabled, JFrame parentFrame) {
         this.quiz = quiz;
-        this.mainMenu = mainMenu;
+        this.app = app;
         this.backgroundMusicClip = backgroundMusicClip;
         this.musicEnabled = musicEnabled;
-        this.parentFrame = parentFrame;
 
         setLayout(new BorderLayout());
         setOpaque(false);
@@ -256,13 +254,11 @@ public class ResultsScreen extends JPanel {
 
     private void retryQuiz() {
         quiz.reset();
-        new QuizUI(quiz, mainMenu, backgroundMusicClip, musicEnabled);
-        parentFrame.dispose();
+        app.showQuiz();
     }
 
     private void returnToMenu() {
         quiz.reset();
-        mainMenu.returnFromQuiz();
-        parentFrame.dispose();
+        app.showMainMenu();
     }
 }
