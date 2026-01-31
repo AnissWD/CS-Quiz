@@ -118,7 +118,7 @@ Thanks for the great retro vibes! 🕹️✨
 
 ### Adding Questions
 
-Edit the `Quiz.java` file to add your own questions:
+Edit the `Main.java` file to add your own questions:
 
 ```java
 quiz.add(new Question(
@@ -133,7 +133,7 @@ quiz.add(new Question(
 
 ### Changing Colors
 
-Modify the color constants in `QuizUI.java`:
+Modify the color constants in `QuizPanel.java`:
 
 ```java
 private final Color ACCENT_CYAN = new Color(0, 180, 200);
