@@ -4,13 +4,13 @@ import javax.swing.*;
 import javax.sound.sampled.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
 public class QuizUI extends JFrame {
     private Quiz quiz;
+    private MainMenu mainMenu;
     private JLabel questionLabel;
     private JLabel progressLabel;
     private JLabel scoreLabel;
@@ -20,7 +20,6 @@ public class QuizUI extends JFrame {
     private JPanel progressBarPanel;
     private JLabel streakLabel;
     private JLabel timerLabel;
-    private MainMenu mainMenu;
 
     private int streak = 0;
     private Timer countdownTimer;
@@ -46,12 +45,14 @@ public class QuizUI extends JFrame {
         this.mainMenu = mainMenu;
         this.backgroundMusicClip = sharedMusicClip;
         this.musicEnabled = musicState;
+
         setTitle("CS QUIZ");
         setSize(700, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0));
+
         try {
             Image icon = Toolkit.getDefaultToolkit().getImage("src/icons/CSQuizIcon.png");
             setIconImage(icon);
@@ -116,7 +117,6 @@ public class QuizUI extends JFrame {
         add(mainPanel);
         loadQuestion();
         setVisible(true);
-
     }
 
     private JPanel createTitleBar() {
@@ -667,131 +667,12 @@ public class QuizUI extends JFrame {
 
     private void showFinalScore() {
         stopTimer();
-        stopBackgroundMusic();
 
         getContentPane().removeAll();
 
-        JPanel finalPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        ResultsScreen resultsScreen = new ResultsScreen(quiz, mainMenu, backgroundMusicClip, musicEnabled, this);
+        add(resultsScreen);
 
-                GradientPaint gradient = new GradientPaint(
-                        0, 0, BG_DARK,
-                        getWidth(), getHeight(), new Color(30, 20, 50)
-                );
-                g2d.setPaint(gradient);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-            }
-        };
-        finalPanel.setLayout(new GridBagLayout());
-
-        JPanel scoreCard = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                g2d.setColor(GLOW_MAGENTA);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-
-                g2d.setColor(BG_CARD);
-                g2d.fillRoundRect(3, 3, getWidth() - 6, getHeight() - 6, 27, 27);
-
-                GradientPaint border = new GradientPaint(
-                        0, 0, ACCENT_CYAN,
-                        getWidth(), getHeight(), ACCENT_MAGENTA
-                );
-                g2d.setPaint(border);
-                g2d.setStroke(new BasicStroke(3));
-                g2d.drawRoundRect(3, 3, getWidth() - 6, getHeight() - 6, 27, 27);
-            }
-        };
-        scoreCard.setOpaque(false);
-        scoreCard.setLayout(new BoxLayout(scoreCard, BoxLayout.Y_AXIS));
-        scoreCard.setBorder(BorderFactory.createEmptyBorder(50, 80, 50, 80));
-
-        JLabel completedLabel = new JLabel("QUIZ COMPLETED!");
-        completedLabel.setFont(new Font("Consolas", Font.BOLD, 28));
-        completedLabel.setForeground(ACCENT_CYAN);
-        completedLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel scoreLabel = new JLabel(quiz.getScore() + " / " + quiz.getTotal());
-        scoreLabel.setFont(new Font("Consolas", Font.BOLD, 72));
-        scoreLabel.setForeground(TEXT_PRIMARY);
-        scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        double percentage = (quiz.getScore() / (double) quiz.getTotal()) * 100;
-        JLabel percentLabel = new JLabel(String.format("%.1f%%", percentage));
-        percentLabel.setFont(new Font("Consolas", Font.PLAIN, 24));
-        percentLabel.setForeground(ACCENT_YELLOW);
-        percentLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        String grade;
-        Color gradeColor;
-        if (percentage >= 90) {
-            grade = "EXCELLENT!";
-            gradeColor = SUCCESS;
-        } else if (percentage >= 70) {
-            grade = "GOOD JOB!";
-            gradeColor = ACCENT_CYAN;
-        } else if (percentage >= 50) {
-            grade = "KEEP TRYING!";
-            gradeColor = ACCENT_YELLOW;
-        } else {
-            grade = "NEEDS WORK";
-            gradeColor = ERROR;
-        }
-
-        JLabel gradeLabel = new JLabel(grade);
-        gradeLabel.setFont(new Font("Consolas", Font.BOLD, 20));
-        gradeLabel.setForeground(gradeColor);
-        gradeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JButton closeBtn = new JButton("CLOSE") {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                GradientPaint gradient = new GradientPaint(
-                        0, 0, ACCENT_MAGENTA,
-                        getWidth(), 0, ACCENT_CYAN
-                );
-                g2d.setPaint(gradient);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-
-                super.paintComponent(g);
-            }
-        };
-        closeBtn.setFont(new Font("Consolas", Font.BOLD, 16));
-        closeBtn.setForeground(Color.WHITE);
-        closeBtn.setPreferredSize(new Dimension(200, 45));
-        closeBtn.setMaximumSize(new Dimension(200, 45));
-        closeBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        closeBtn.setBorderPainted(false);
-        closeBtn.setFocusPainted(false);
-        closeBtn.setContentAreaFilled(false);
-        closeBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        closeBtn.addActionListener(e -> {
-            mainMenu.returnFromQuiz();
-            dispose();
-        });
-        scoreCard.add(completedLabel);
-        scoreCard.add(Box.createVerticalStrut(30));
-        scoreCard.add(scoreLabel);
-        scoreCard.add(Box.createVerticalStrut(10));
-        scoreCard.add(percentLabel);
-        scoreCard.add(Box.createVerticalStrut(20));
-        scoreCard.add(gradeLabel);
-        scoreCard.add(Box.createVerticalStrut(40));
-        scoreCard.add(closeBtn);
-
-        finalPanel.add(scoreCard);
-        add(finalPanel);
         revalidate();
         repaint();
     }
@@ -859,6 +740,7 @@ public class QuizUI extends JFrame {
             }
         }).start();
     }
+
     private void playCorrectSound() {
         File soundFile = new File("src/sounds/correct.wav");
         if (soundFile.exists()) {
@@ -884,33 +766,6 @@ public class QuizUI extends JFrame {
                 try { Thread.sleep(50); } catch (InterruptedException e) {}
                 playBeep(300, 200);
             }).start();
-        }
-    }
-
-    private void startBackgroundMusic() {
-        try {
-            File musicFile = new File("src/sounds/background.wav");
-            System.out.println("Looking for background music at: " + musicFile.getAbsolutePath());
-
-            if (!musicFile.exists()) {
-                System.out.println("Background music file not found!");
-                return;
-            }
-
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(musicFile);
-            backgroundMusicClip = AudioSystem.getClip();
-            backgroundMusicClip.open(audioInputStream);
-
-            if (backgroundMusicClip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
-                FloatControl gainControl = (FloatControl) backgroundMusicClip.getControl(FloatControl.Type.MASTER_GAIN);
-                gainControl.setValue(-10.0f);
-            }
-
-            backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
-            backgroundMusicClip.start();
-            System.out.println("Background music started");
-        } catch (Exception e) {
-            System.out.println("Error starting background music: " + e.getMessage());
         }
     }
 
