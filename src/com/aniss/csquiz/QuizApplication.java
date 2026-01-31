@@ -113,7 +113,7 @@ public class QuizApplication extends JFrame {
             musicBtn.setText(musicEnabled ? "MUSIC ON" : "MUSIC OFF");
         });
 
-        fullscreenBtn = createTitleBarButton(isFullscreen ? "WINDOWED" : "FULLSCREEN");
+        fullscreenBtn = createTitleBarButton(isFullscreen ? "FULLSCREEN" : "WINDOWED");
         fullscreenBtn.addActionListener(e -> toggleFullscreen());
 
         JButton minimizeBtn = createTitleBarButton("MIN");
@@ -191,13 +191,13 @@ public class QuizApplication extends JFrame {
                 setLocation(windowedLocation);
             }
             setSize(windowedSize);
-            fullscreenBtn.setText("FULLSCREEN");
+            fullscreenBtn.setText("WINDOWED");
             isFullscreen = false;
         } else {
             windowedLocation = getLocation();
             windowedSize = getSize();
             setExtendedState(JFrame.MAXIMIZED_BOTH);
-            fullscreenBtn.setText("WINDOWED");
+            fullscreenBtn.setText("FULLSCREEN");
             isFullscreen = true;
         }
     }
